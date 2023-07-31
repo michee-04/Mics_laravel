@@ -59,4 +59,8 @@ Route::controller(LoginController::class)->group(function(){
         // Route pour la modification de l'email
         Route::match(['get', 'post'], '/changer_email/{token}', 'changementEmail')
                 ->name('app_changer_email');
+
+        // Route pour l'oubli du mot de passe
+        Route::match(['get', 'post'], '/oubli_pasword', 'oubliPassword')
+                ->name('app_oubli_pasword');
 });

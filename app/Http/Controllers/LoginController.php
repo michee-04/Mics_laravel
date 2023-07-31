@@ -219,5 +219,11 @@ class LoginController extends Controller
             }
                 
         }
+
+        // fonction pour mot de passe oublié
+        public function oubliPassword()
+        {
+            return view('auth.oubli_password');
+        }
         
 }

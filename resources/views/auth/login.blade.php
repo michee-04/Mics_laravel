@@ -29,21 +29,21 @@
                         </div>
                     @enderror
 
-                    <label for="email">Email:</label>
+                    <label for="email" class="form-label">Email:</label>
                     <input type="email" name="email" id="email" class="form-control mb-3 @error('email') is-invalid @enderror" value="{{ old('email') }}" required autocomplete="email" autofocus>
-                    <label for="password">Mot de passe</label>
+                    <label for="password" class="form-label">Mot de passe</label>
                     <input type="password" name="password" id="password" class="form-control mb-3 @error('email') is-invalid @enderror" required autocomplete="current-password">
 
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" id="rappel" name="rappel" {{ old('rappel') ? 'checked' : '' }}>
-                                <label class="form-check-label" for="rappel">Rapellez vous de moi</label>
+                                <label class="form-check-label" class="form-label" for="rappel">Rapellez vous de moi</label>
                             </div>
                         </div>
 
                         <div class="col-md-6 text-end">
-                            <a href="#">Mot de passe oublé ?</a>
+                            <a href="{{ route('app_oubli_pasword') }}">Mot de passe oublé ?</a>
                         </div>
                     </div>
 
