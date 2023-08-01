@@ -18,7 +18,7 @@
                     @include('alertes.alert_message')
 
                     <label for="email-send" class="form-label">Email:</label>
-                    <input type="email" name="email-send" id="email-send" class="form-control" placeholder="Entrez votre adresse email">
+                    <input type="email" name="email-send" id="email-send" class="form-control @error('email-error') is-invalid @enderror" value="@if(Session::has('old_email')) {{ Session::get('old_email') }} @endif" placeholder="Entrez votre adresse email" required>
 
                     <div class="d-grid gap-2 mt-3">
                         <button class="btn btn-primary" type="submit">Rénitialisation</button>

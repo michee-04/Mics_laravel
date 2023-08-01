@@ -37,7 +37,7 @@ Route::controller(LoginController::class)->group(function(){
         Route::get('/logout', 'logout')->name('app_logout');
 
         // Chemin de vérification de l'email
-        Route::post('/exist_emaile', 'existEmail')
+        Route::post('/exist_email', 'existEmail')
                 ->name('app_exist_email');
 
         // on passe une variable dans l'url en utilisant les acolades {token} 

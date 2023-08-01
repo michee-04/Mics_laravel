@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Carbon\Exceptions\EndLessPeriodException;
 use Illuminate\Http\Request;
 use App\services\EmailService;
 use Illuminate\Support\Facades\DB;
@@ -223,6 +224,42 @@ class LoginController extends Controller
         // fonction pour mot de passe oublié
         public function oubliPassword()
         {
+
+            // Si la requête est de type post
+            if($this->request->isMethod('post'))
+            {
+                $email = $this->request->input('email-send');
+                $user = DB::table('users')->where('email', $email)->first();
+                
+                /**
+                 * Vérification de l'adrese email saisi s'il existe dans la base de données
+                 * et si l'email existe un lien sera envoyée pour reinitialiser le mot de passe 
+                 * dans le ca contraire affiche un messsage d'erreur
+                 */
+
+                 if($user)
+                 {
+                    $full_name = $user->name;
+                    //Géneration du token pour la reinitialisation du mot de passe
+                    $activation_token = md5(uniqid()) . $email . sha1($email);
+
+                    $emailResetPassword = new EmailService;
+                    $subject = "reinitialiser votre mot de passe";
+                    
+
+                    $emailResetPassword->resetPassword($subject, $email, $full_name, true, $activation_token);
+
+                 }else
+                 
+                 {
+                    $message = "L'adresse email saisi n'existe pas";
+                    return back()->withErrors(['email-error' => $message])
+                                ->with('old_email', $email)
+                                ->with('danger', $message);
+                 }
+                 
+            }
+            
             return view('auth.oubli_password');
         }
         
