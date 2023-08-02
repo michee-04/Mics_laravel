@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\services\EmailService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -230,6 +231,7 @@ class LoginController extends Controller
             {
                 $email = $this->request->input('email-send');
                 $user = DB::table('users')->where('email', $email)->first();
+                $message = null;
                 
                 /**
                  * Vérification de l'adrese email saisi s'il existe dans la base de données
@@ -237,30 +239,101 @@ class LoginController extends Controller
                  * dans le ca contraire affiche un messsage d'erreur
                  */
 
-                 if($user)
-                 {
+                if($user)
+                {
                     $full_name = $user->name;
                     //Géneration du token pour la reinitialisation du mot de passe
                     $activation_token = md5(uniqid()) . $email . sha1($email);
 
                     $emailResetPassword = new EmailService;
                     $subject = "reinitialiser votre mot de passe";
-                    
-
                     $emailResetPassword->resetPassword($subject, $email, $full_name, true, $activation_token);
 
-                 }else
-                 
-                 {
+                    // Enregitrement du token dans la base de données
+                    DB::table('users')
+                        ->where('email', $email)
+                        ->update(['activation_token' => $activation_token]);
+
+                    $message = "L'email a été envoyé pour la reinitialisation de votre mot de passe, allez y vérifier le mail dans votre boîte de reception";
+                    return back()->withErrors(['email-success' => $message])
+                                ->with('old_email', $email)
+                                ->with('success', $message);
+
+                }
+                else
+                {
                     $message = "L'adresse email saisi n'existe pas";
                     return back()->withErrors(['email-error' => $message])
                                 ->with('old_email', $email)
                                 ->with('danger', $message);
-                 }
+                }
                  
             }
             
             return view('auth.oubli_password');
+        }
+
+        // fonction por la route de la reinitialisation du mot de passe
+        public function changePassword($token)
+        {
+            // Vérification de la methode si elle et de type POST
+
+            if($this->request->isMethod('post'))
+            {
+                $new_password = $this->request->input('new-password');
+                $new_password_confirm = $this->request->input('new-password-confirm');
+                // la fonction qui permet de compter le nombre est strLn
+                $passwordLength = strlen($new_password);
+                $message = null;
+
+                if($passwordLength >= 8)
+                {
+                    
+                    $message  = "Mot de passe non identique";
+                    if($new_password == $new_password_confirm) 
+                    {
+                        // Récuperation du token de l'utilisateur 
+                        $user = DB::table('users')->where('activation_token', $token)->first();
+                        
+                        if($user)
+                        {
+                            $id_user = $user -> id;
+                            DB::table('users')
+                            ->where('id', $id_user)
+                            ->update([
+                                'password' => Hash::make($new_password),
+                                'activation_token' => "",
+                                'updated_at' => new \DateTimeImmutable
+                                ]);
+
+                            return redirect()->route('login')->with('success', "Mot de passe enregistré avec success");
+                        }else
+                        {
+                            return back()->with('anger', "Ce token est different de celui d l'utilisateur");
+                        }
+
+
+                    }else
+                    {
+                        return back()->withErrors(['password-error-confirm' => $message, 'passwoord-success' => 'success'])
+                                        ->with('danger', $message)
+                                        ->with('old-new_password_confirm', $new_password_confirm)
+                                        ->with('old-new-password', $new_password);
+                        
+                    }
+                }else
+                {
+                    $message = "Le mot de passe doit avoir au minimum huit caractères";
+                    return back()->withErrors(['password-error' => $message])
+                                    ->with('danger', $message)
+                                    ->with('old-new-password', $new_password);
+                }
+                 
+            }
+
+            return view('auth.change_password', [
+                'activation_token' => $token
+            ]);
         }
         
 }

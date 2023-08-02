@@ -63,4 +63,8 @@ Route::controller(LoginController::class)->group(function(){
         // Route pour l'oubli du mot de passe
         Route::match(['get', 'post'], '/oubli_pasword', 'oubliPassword')
                 ->name('app_oubli_pasword');
+
+        // Route pour chhanger le mot de passe
+        Route::match(['get', 'post'], '/changer_password/{token}', 'changePassword')
+                ->name('app_changer_password');
 });
